@@ -26,6 +26,51 @@
     <meta property="fb:app_id" content="<%= @app['name'] %>" />
 
     <script type="text/javascript" src="/javascripts/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="/javascripts/jquery-ui-1.8.21.custom.min.js"></script>
+
+
+		<style>
+			#products { float:left; width: 500px; margin-right: 2em; }
+			#cart { width: 200px; float: left; }
+			/* style the list to maximize the droppable hitarea */
+			#cart ol { margin: 0; padding: 1em 0 1em 3em; }
+			</style>
+			
+			
+			<script>
+			$(function() {
+				$( "ul#files-ul li" ).draggable({
+					
+					appendTo: "body",
+					helper: "clone",
+					revert: "true"
+				});
+				$( "li.friend-droppable" ).droppable({
+					activeClass: "ui-state-default",
+					hoverClass: "ui-state-hover",
+					accept: ":not(.ui-sortable-helper)",
+					drop: function( event, ui ) {
+			        var filename = ui.draggable.text().replace(/^\s+|\s+$/g, '')
+							var friend_name = $(this).text().replace(/^\s+|\s+$/g, '')
+							var friend_id = event.target.id
+							FB.ui(
+	            {
+	              method : 'apprequests',
+	              message: "I want to share \"" + filename + "\" with you, "+friend_name.split(" ")[0] + "!",
+	              to     : friend_id
+	            },
+	            function (response) {
+	              // If response is null the user canceled the dialog
+	              if (response != null) {
+	                logResponse(response);
+	              }
+	            }
+            )
+		   }});})
+			</script>
+
+
+
 
     <script type="text/javascript">
       function logResponse(response) {
@@ -146,6 +191,26 @@
     <% unless @user %>
       <section id="guides" class="clearfix thin"></section>
     <% else %>
+		<div id="share-app">
+		  <p>Share your app:</p>
+		  <ul>
+		    <li>
+		      <a href="#" class="facebook-button" id="postToWall" data-url="<%= url %>">
+		        <span class="plus">Post to Wall</span>
+		      </a>
+		    </li>
+		    <li>
+		      <a href="#" class="facebook-button speech-bubble" id="sendToFriends" data-url="<%= url %>">
+		        <span class="speech-bubble">Send Message</span>
+		      </a>
+		    </li>
+		    <li>
+		      <a href="#" class="facebook-button apprequests" id="sendRequest" data-message="Test this awesome app">
+		        <span class="apprequests">Send Requests</span>
+		      </a>
+		    </li>
+		  </ul>
+		</div>
       <section id="guides" class="clearfix thin"> 
         <h3 class="centered"> Start sharing files now!</h3>
 				<h5 class="centered">Drag a file over a friend to share it with them!</h5>
@@ -160,7 +225,7 @@
             <h4><a href="/back">Back</a> </h4>
           <% end %>
  	        <% if @dir %>
-	          <ul class="friends">
+	          <ul class="friends" id="files-ul">
 		          <% if @dirs %>
 	          		<% @dirs.each do |item| %>
 			            <li>
@@ -186,9 +251,9 @@
 	         <h3>A few of your friends</h3>
 	         <ul class="pretty">
 	           <% @friends.each do |friend| %>
-	             <li>
+	             <li class="friend-droppable" id="<%=friend['uid']%>">
 	               <a href="#" onclick="window.open('http://www.facebook.com/<%= friend['id']%>')">
-	                 <img src="https://graph.facebook.com/<%= friend['id'] %>/picture?type=square" alt="<%= friend['name'] %>">
+	                 <img src="https://graph.facebook.com/<%= friend['uid'] %>/picture?type=square" alt="<%= friend['name'] %>">
 	                 <%= friend['name'] %>
 	               </a>
 	             </li>
@@ -228,13 +293,11 @@
 		    <div>
 			    <h2>Debug Info</h2>
 			    <p>Response: <%= @response %> </p>
-		      <p>Dropbox Token: <%= @dropbox_access.inspect %> </p>
+		      <p>Dropbox Token: <%= @dropbox_access %> </p>
 		      <p>Current Directory: <%= @cur_dir %></p>
 
 			    
 			  </div>
     <% end %>
-
-
   </body>
 </html>

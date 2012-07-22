@@ -30,6 +30,10 @@ h1 {
   font-weight: normal;
 }
 
+li{
+  text-decoration: none;
+}
+
 /* ------------------------------------------ */
 
 /* =header

@@ -65,30 +65,31 @@ end
 # the facebook session expired! reset ours and restart the process
 error(Koala::Facebook::APIError) do
   session[:access_token] = nil
+  session[:fbid] = nil
   redirect "/auth/facebook"
 end
 
 get "/" do
   # Get base API Connection
   @graph  = Koala::Facebook::API.new(session[:access_token])
-
   # Get public details of current application
   @app  =  @graph.get_object(ENV["FACEBOOK_APP_ID"])
   
   if session[:access_token]
     @user    = @graph.get_object("me")
     @friends = @graph.get_connections('me', 'friends')
-    @photos  = @graph.get_connections('me', 'photos')
+    @friends = @graph.fql_query("SELECT uid, name, is_app_user, pic_square FROM user WHERE uid=1342512190 or uid=611336274 or uid=688985918")
+    #@photos  = @graph.get_connections('me', 'photos')
     @likes   = @graph.get_connections('me', 'likes').first(4)
     # for other data you can always run fql
     @friends_using_app = @graph.fql_query("SELECT uid, name, is_app_user, pic_square FROM user WHERE uid in (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1")
     # get root directory listing from back-backend
+    session[:fbid]=@user["id"]
     
     if not session[:cur_dir]
       session[:cur_dir] = '\\'
     end   
     @cur_dir = session[:cur_dir]
-
 =begin
     Socket.tcp("23.21.149.90", 9125) {|sock|
       sock.print "{\"requestType\" : \"getFileList\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n \n"
@@ -121,9 +122,10 @@ get "/" do
     if session[:dropbox_session]
       puts "Dropbox access is enabled!"
       dropbox_session = DropboxSession.deserialize(session[:dropbox_session])
-      if dropbox_session.authorized?
-        @dropbox_access = dropbox_session.get_access_token
-      end
+      
+        @dropbox_access = dropbox_session.get_access_token()
+        puts @dropbox_access
+      
     end 
 
      
@@ -177,17 +179,24 @@ get '/auth/dropbox' do
   else
     puts"the user has returned from Dropbox"
     dropbox_session = DropboxSession.deserialize(session[:dropbox_session])
-    #dropbox_session.authorize(params)
-    dropbox_session.get_access_token  #we've been authorized, so now request an access_token
     session[:dropbox_session] = dropbox_session.serialize # re-serialize the authenticated session
+
 =begin
-    Socket.tcp("23.21.149.90", 9125) {|sock|   fbid, dbid, accestoken, secretkey
-      sock.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n \n"
+    Socket.tcp("23.21.149.90", 9125) {|sock|   fbid, dbid, accesstoken, secretkey
+      sock.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + session[":fbid"] 
+                                                                                              + "\", "
+                                                                                              + "\"/\""
+                                                                                              + "\", "
+                                                                                              
+                                                                                              + "]} \n \n"
       sock.close_write
       response = sock.read
     }
     @response = response
 =end
+
+
+
     redirect '/'
   end
 end
