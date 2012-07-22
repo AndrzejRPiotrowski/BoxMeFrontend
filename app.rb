@@ -90,14 +90,12 @@ get "/" do
       session[:cur_dir] = '\\'
     end   
     @cur_dir = session[:cur_dir]
-=begin
-    Socket.tcp("23.21.149.90", 9125) {|sock|
-      sock.print "{\"requestType\" : \"getFileList\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n \n"
+
+    @response = Socket.tcp("23.21.149.90", 9125) {|sock|
+      sock.print "{\"requestType\" : \"getFilesUnderPath\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n \n"
       sock.close_write
       response = sock.read
     }
-    @response = response
-=end
 
     #url = URI.parse("http://23.21.149.90:9125/getDirectory?uid=#{uid}&dir=#{session[:dir]}")
     #response = Net::HTTP::Post.new(url.path) 
@@ -118,32 +116,9 @@ get "/" do
     end
     @dirs = @dir["dirs"]
     @files = @dir["files"]
-              
-    if session[:dropbox_session]
-      puts "Dropbox access is enabled!"
-      dropbox_session = DropboxSession.deserialize(session[:dropbox_session])
-      
-        @dropbox_access = dropbox_session.get_access_token()
-        puts @dropbox_access
-      
-    end 
-
-     
   end
   erb :index
 end
-
-get '/upload' do
-   redirect '/' unless session[:dropbox_session]
-   @dropbox_session = DropboxSession.deserialize(session[:dropbox_session])
-   redirect '/' unless @dropbox_session.authorized?
-   client = DropboxClient.new(@dropbox_session, DROPBOX_ACCESS_TYPE) #raise an exception if session not authorized
-   puts "linked account:", client.account_info().inspect # look up account information
-   file = open('test-file.txt')
-   response = client.put_file('/test-file.txt', file)
-   puts "uploaded:", response.inspect
-   redirect "/"
-  end
 
 
 # used by Canvas apps - redirect the POST to be a regular GET
@@ -175,28 +150,23 @@ get '/auth/dropbox' do
   if not params[:oauth_token] 
     dropbox_session = DropboxSession.new(DROPBOX_APP_KEY, DROPBOX_APP_SECRET)
     session[:dropbox_session] = dropbox_session.serialize
-    redirect dropbox_session.get_authorize_url("http://localhost:5000")
+    session[:request_token] = dropbox_session.get_request_token
+    redirect dropbox_session.get_authorize_url(ENV["DROPBOX_CALLBACK_DOMAIN"])
   else
     puts"the user has returned from Dropbox"
     dropbox_session = DropboxSession.deserialize(session[:dropbox_session])
-    session[:dropbox_session] = dropbox_session.serialize # re-serialize the authenticated session
-
-=begin
-    Socket.tcp("23.21.149.90", 9125) {|sock|   fbid, dbid, accesstoken, secretkey
-      sock.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + session[":fbid"] 
-                                                                                              + "\", "
-                                                                                              + "\"/\""
-                                                                                              + "\", "
-                                                                                              
-                                                                                              + "]} \n \n"
+    @dropbox_access = dropbox_session.get_access_token()
+    @dropbox_key = @dropbox_access.key
+    @dropbox_secret = @dropbox_access.secret
+    client = DropboxClient.new(dropbox_session, DROPBOX_ACCESS_TYPE) #raise an exception if session not authorized
+    uid = client.account_info["uid"] # look up account information
+    @response = Socket.tcp("23.21.149.90", 9125) {|sock|
+      sock.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + uid.to_s + "\", " + "\"" + @dropbox_key.to_s +  "\"" + @dropbox_secret.to_s + "\" } \n \n"                                                                                                                                                      + "]} \n \n"
       sock.close_write
       response = sock.read
+      puts response
     }
-    @response = response
-=end
-
-
-
+    session[:dropbox_session] = dropbox_session.serialize # re-serialize the authenticated session
     redirect '/'
   end
 end
