@@ -220,6 +220,11 @@ header .tagline {
   text-align:center;
 }
 
+#guides h5{
+  font-size: 10px;
+  text-align:center;
+}
+
 #guides ul li {
   font-size: 11px;
   list-style: none;
@@ -281,7 +286,7 @@ header .tagline {
   text-align: center;
 }
 
-#samples ul {
+#samples ul.pretty {
   background: url("../images/picture-sketch.png") 4px 8px;
   background-repeat: repeat-y;
   height: 161px;
@@ -289,7 +294,7 @@ header .tagline {
   padding-top: 8px;
 }
 
-#samples li {
+#samples ul.pretty li {
   background-repeat: no-repeat;
   background-position: 0 0;
   color: #7c7c7c;
@@ -302,8 +307,8 @@ header .tagline {
   position: relative;
 }
 
-#samples li a:link,
-#samples li a:visited {
+#samples ul.pretty li a:link,
+#samples ul.pretty li a:visited {
   color: #7c7c7c;
   display: block;
   line-height: 32px;

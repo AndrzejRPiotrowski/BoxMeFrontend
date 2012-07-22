@@ -148,20 +148,31 @@
     <% else %>
       <section id="guides" class="clearfix"> 
         <h3 class="centered"> Start sharing files now!</h3>
-				<p class="centered">Drag a file over a friend to share it with them!</p>
+				<h5 class="centered">Drag a file over a friend to share it with them!</h5>
       </section>
         
     <section id="samples" class="clearfix">
           
 			<div class="list" id="files">
-        <h3>Your BoxMe files</h3>
-	        <% if @files%>
+          <h3>Current Directory: <%= @cur_dir %></h3>
+          <% if @cur_dir != '\\'%>
+            <h4><a href="/back">Back</a> </h4>
+          <% end %>
+ 	        <% if @dir %>
 	          <ul class="friends">
-          		<% @files.each do |file| %>
-		            <li>
-		              <a href="#"><%= file['name'] %>
-		              </a>
-		            </li>
+		          <% if @dirs %>
+	          		<% @dirs.each do |item| %>
+			            <li>
+			              <a href="/browse/<%= item %>"><%= item %></a>
+			            </li>
+			          <% end %>
+		          <% end %>
+		          <% if @files %>
+		        		<% @files.each do |item| %>
+			            <li>
+			              <%= item %>
+			            </li>
+			          <% end %>
 		          <% end %>
 	          </ul>
 	        <% else %>
@@ -172,7 +183,7 @@
 
 			<div class="list" id="friends">
 	         <h3>A few of your friends</h3>
-	         <ul class="friends">
+	         <ul class="pretty">
 	           <% @friends.each do |friend| %>
 	             <li>
 	               <a href="#" onclick="window.open('http://www.facebook.com/<%= friend['id']%>')">
@@ -192,7 +203,7 @@
 		      <h1>Add more cloud storage services</h1>
 		      <ul>
 		        <li>
-		          <a href="#" class="icon dropbox">Dropbox</a>
+		          <a href='auth/dropbox' class="icon dropbox">Dropbox</a>
 		          <p>Info about Dropbox.</p>
 		        </li>
 		        <li>
@@ -213,6 +224,13 @@
 		        </li>
 		      </ul>
 		    </section>
+		    <div>
+			    <h2>Debug Info</h2>
+			    <p>Response: <%= @response %> </p>
+		      <p>Dropbox Token: <%= @dropbox_access.inspect %> </p>
+		      <p>Current Directory: <%= @cur_dir %></p>
+			    
+			  </div>
     <% end %>
 
 
