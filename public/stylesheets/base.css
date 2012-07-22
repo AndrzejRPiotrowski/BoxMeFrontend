@@ -349,7 +349,16 @@ header .tagline {
 
 
 #files{
-  margin-right:256px;
+  position:relative;
+  padding-right:300px;
+  margin-right:300px;
+  width:350px;
+  height:400;
+}
+
+#friends{
+  float:right;
+  
 }
 
 /* ------------------------------------------ */
