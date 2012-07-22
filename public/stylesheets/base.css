@@ -265,6 +265,7 @@ header .tagline {
 #guides ul li a.dropbox {
   background-position: 35px -519px;
 }
+
 /* ------------------------------------------ */
 
 /* =samples
@@ -385,4 +386,9 @@ header .tagline {
 
 .clearfix {
   zoom: 1;
+}
+
+#guides.thin {
+    padding: 4px 4px 4px 4px;
+  
 }

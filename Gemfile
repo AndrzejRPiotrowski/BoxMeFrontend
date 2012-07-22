@@ -1,6 +1,7 @@
 source :gemcutter
 
 gem "sinatra"
+gem "sinatra-reloader"
 gem "koala"
 gem "json"
 gem "httparty"
