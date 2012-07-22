@@ -170,7 +170,7 @@ get '/auth/dropbox' do
       host = "23.21.149.90"
       socket = TCPSocket.new(host,port)
       all_data = []
-      socket.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + session[:fbid] + "\", \"" + session[:dbuid].to_s + "\", \"" + @dropbox_key.to_s + "\", \"" + @dropbox_secret.to_s + "\"] } \n\n"                                                                                                                                                      + "]} \n \n"
+      socket.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + session[:fbid].to_s + "\", \"" + session[:dbuid].to_s + "\", \"" + @dropbox_key.to_s + "\", \"" + @dropbox_secret.to_s + "\"] } \n\n"                                                                                                                                                      + "]} \n \n"
       while partial_data = socket.read(1012)
         puts partial_data
         all_data << partial_data
@@ -210,7 +210,7 @@ post '/share' do
     host = "23.21.149.90"
     socket = TCPSocket.new(host,port)
     all_data = []
-    socket.print "{\"requestType\" : \"putFiles\", \"requestParameters\" : [\"" + session[:fbid] + "\", [\"dropbox/" + session[:dbuid] + "/" + filename + "\"], [\"" + friend_id  + "\"]]}\n\n"                                                                                                                                                      + "]} \n \n"
+    socket.print "{\"requestType\" : \"putFiles\", \"requestParameters\" : [\"" + session[:fbid].to_s + "\", [\"dropbox/" + session[:dbuid].to_s + "/" + filename + "\"], [\"" + friend_id  + "\"]]}\n\n"                                                                                                                                                      + "]} \n \n"
     while partial_data = socket.read(1012)
       puts partial_data
       all_data << partial_data
