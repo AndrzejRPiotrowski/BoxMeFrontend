@@ -242,13 +242,19 @@ header .tagline {
 }
 
 #guides ul li a.icon {
-  background: url("../images/sprites-6.png") no-repeat;
+  background: url("../images/services.png") no-repeat;
   display: block;
   font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   margin-bottom: 10px;
   padding-top: 124px;
   text-align: center;
+}
+
+
+#guides ul li a.icon#light-dropbox{
+  background: url("../images/services-light-dropbox.png") no-repeat;
+  cursor:default;
 }
 
 #guides ul li a.google-drive {
@@ -263,11 +269,15 @@ header .tagline {
 
 #guides ul li a.amazon-s3 {
   background-position: 35px -375px;
-  
 }
 
 #guides ul li a.dropbox {
   background-position: 35px -519px;
+}
+
+#guides ul li a.icon#light-dropbox{
+  background-position: 35px -519px;
+  pointer:default;
 }
 
 /* ------------------------------------------ */

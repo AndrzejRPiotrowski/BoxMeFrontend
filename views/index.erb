@@ -269,7 +269,11 @@
 		      <h1>Add more cloud storage services</h1>
 		      <ul>
 		        <li>
-		          <a href='auth/dropbox' class="icon dropbox">Dropbox</a>
+			        <% if @dropbox_enabled %>
+		            <a href='#' class="icon dropbox" id="light-dropbox">Dropbox</a>
+		          <% else %>
+	              <a href='auth/dropbox' class="icon dropbox">Dropbox</a>
+		          <% end %>
 		          <p>Info about Dropbox.</p>
 		        </li>
 		        <li>

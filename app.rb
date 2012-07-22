@@ -8,7 +8,7 @@ require "uri"
 require 'open-uri'
 require 'socket'
 
-
+ACCEPTING_CONNECTIONS = false
 DROPBOX_APP_KEY = "u4d52lnoqpoqztk"
 DROPBOX_APP_SECRET = "58xjxsb08ybg584"
 DROPBOX_ACCESS_TYPE = :dropbox    #The two valid values here are :app_folder and :dropbox
@@ -90,16 +90,20 @@ get "/" do
       session[:cur_dir] = '\\'
     end   
     @cur_dir = session[:cur_dir]
-
-    @response = Socket.tcp("23.21.149.90", 9125) {|sock|
-      sock.print "{\"requestType\" : \"getFilesUnderPath\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n \n"
-      sock.close_write
-      response = sock.read
-    }
+    
+    if ACCEPTING_CONNECTIONS
+      @response = Socket.tcp("23.21.149.90", 9125) {|sock|
+        sock.print "{\"requestType\" : \"getFilesUnderPath\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n \n"
+        sock.close_write
+        response = sock.read
+      }
+    end
 
     #url = URI.parse("http://23.21.149.90:9125/getDirectory?uid=#{uid}&dir=#{session[:dir]}")
     #response = Net::HTTP::Post.new(url.path) 
     #@dir = JSON.parse(response)
+    
+    @dropbox_enabled = (session[:dropbox_session]) ? true : false
     
     if @cur_dir == '\\'      
       @dir = Hash["dirs" => ["google_drive", "dropbox"],
@@ -160,12 +164,14 @@ get '/auth/dropbox' do
     @dropbox_secret = @dropbox_access.secret
     client = DropboxClient.new(dropbox_session, DROPBOX_ACCESS_TYPE) #raise an exception if session not authorized
     uid = client.account_info["uid"] # look up account information
-    @response = Socket.tcp("23.21.149.90", 9125) {|sock|
-      sock.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + uid.to_s + "\", " + "\"" + @dropbox_key.to_s +  "\"" + @dropbox_secret.to_s + "\" } \n \n"                                                                                                                                                      + "]} \n \n"
-      sock.close_write
-      response = sock.read
-      puts response
-    }
+    if ACCEPTING_CONNECTIONS
+      @response = Socket.tcp("23.21.149.90", 9125) {|sock|
+        sock.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + uid.to_s + "\", " + "\"" + @dropbox_key.to_s +  "\"" + @dropbox_secret.to_s + "\" } \n \n"                                                                                                                                                      + "]} \n \n"
+        sock.close_write
+        response = sock.read
+        puts response
+      }
+    end
     session[:dropbox_session] = dropbox_session.serialize # re-serialize the authenticated session
     redirect '/'
   end
