@@ -8,7 +8,7 @@ require "uri"
 require 'open-uri'
 require 'socket'
 
-ACCEPTING_CONNECTIONS = false
+ACCEPTING_CONNECTIONS = true
 DROPBOX_APP_KEY = "u4d52lnoqpoqztk"
 DROPBOX_APP_SECRET = "58xjxsb08ybg584"
 DROPBOX_ACCESS_TYPE = :dropbox    #The two valid values here are :app_folder and :dropbox
@@ -90,18 +90,19 @@ get "/" do
       session[:cur_dir] = '\\'
     end   
     @cur_dir = session[:cur_dir]
-    
     if ACCEPTING_CONNECTIONS
-      @response = Socket.tcp("23.21.149.90", 9125) {|sock|
-        sock.print "{\"requestType\" : \"getFilesUnderPath\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n \n"
-        sock.close_write
-        response = sock.read
-      }
+      port = 9125
+      host = "23.21.149.90"
+      socket = TCPSocket.new(host,port)
+      all_data = []
+      socket.print "{\"requestType\" : \"getFilesUnderPath\", \"requestParameters\" : [\"" + @user["id"] + "\", " + "\"/\"" + "]} \n\n"
+      while partial_data = socket.read(1012)
+        puts partial_data
+        all_data << partial_data
+      end
+      socket.close
+      @responsedir = JSON.parse(all_data.join)
     end
-
-    #url = URI.parse("http://23.21.149.90:9125/getDirectory?uid=#{uid}&dir=#{session[:dir]}")
-    #response = Net::HTTP::Post.new(url.path) 
-    #@dir = JSON.parse(response)
     
     @dropbox_enabled = (session[:dropbox_session]) ? true : false
     
@@ -165,13 +166,18 @@ get '/auth/dropbox' do
     client = DropboxClient.new(dropbox_session, DROPBOX_ACCESS_TYPE) #raise an exception if session not authorized
     uid = client.account_info["uid"] # look up account information
     if ACCEPTING_CONNECTIONS
-      @response = Socket.tcp("23.21.149.90", 9125) {|sock|
-        sock.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + uid.to_s + "\", " + "\"" + @dropbox_key.to_s +  "\"" + @dropbox_secret.to_s + "\" } \n \n"                                                                                                                                                      + "]} \n \n"
-        sock.close_write
-        response = sock.read
-        puts response
-      }
+      port = 9125
+      host = "23.21.149.90"
+      socket = TCPSocket.new(host,port)
+      all_data = []
+      socket.print "{\"requestType\" : \"registerDropboxAccount\", \"requestParameters\" : [\"" + session[:fbid] + "\", \"" + uid.to_s + "\", \"" + @dropbox_key.to_s + "\", \"" + @dropbox_secret.to_s + "\"] } \n\n"                                                                                                                                                      + "]} \n \n"
+      while partial_data = socket.read(1012)
+        puts partial_data
+        all_data << partial_data
+      end
+      socket.close
     end
+
     session[:dropbox_session] = dropbox_session.serialize # re-serialize the authenticated session
     redirect '/'
   end
@@ -194,4 +200,12 @@ get '/back' do
   session[:cur_dir] = parent
   redirect '/'
 end
+
+post '/share' do
+  puts params["friend_id"]
+  puts params["filename"]
+end
+
+
+
 

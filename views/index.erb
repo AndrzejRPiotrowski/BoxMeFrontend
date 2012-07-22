@@ -62,10 +62,14 @@
 	            function (response) {
 	              // If response is null the user canceled the dialog
 	              if (response != null) {
-	                logResponse(response);
-	              }
-	            }
-            )
+									  $.post('http://localhost:5000/share',
+									         {"friend_id" :friend_id, "file_name" : filename},      
+									         function(data){},
+									         "text");
+								}
+	            logResponse(response);
+            }
+          )
 		   }});})
 			</script>
 
