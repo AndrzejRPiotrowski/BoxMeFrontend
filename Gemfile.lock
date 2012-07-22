@@ -4,6 +4,8 @@ GEM
     addressable (2.2.7)
     crack (0.1.8)
     daemons (1.1.3)
+    dropbox-sdk (1.3)
+      json
     eventmachine (0.12.10)
     faraday (0.7.6)
       addressable (~> 2.2)
@@ -31,6 +33,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dropbox-sdk
   httparty
   json
   koala

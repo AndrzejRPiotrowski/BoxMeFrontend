@@ -39,7 +39,7 @@ header {
   border-right: 1px solid #b3b3b3;
   border-top: 1px solid #b3b3b3;
   font-size: 11px;
-  padding: 24px 18px;
+  padding: 0px 18px;
 }
 
 header h1 {
@@ -209,10 +209,15 @@ header .tagline {
 
 /* =guides
 --------------------------------------------- */
+
 #guides {
   border-bottom: 1px solid #b3b3b3;
   border-left: 1px solid #b3b3b3;
   border-right: 1px solid #b3b3b3;
+}
+
+#guides h3{
+  text-align:center;
 }
 
 #guides ul li {
@@ -228,7 +233,7 @@ header .tagline {
 }
 
 #guides ul li a.icon {
-  background: url("../images/sprites.png") no-repeat;
+  background: url("../images/sprites-6.png") no-repeat;
   display: block;
   font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
@@ -237,19 +242,22 @@ header .tagline {
   text-align: center;
 }
 
-#guides ul li a.websites {
+#guides ul li a.google-drive {
   background-position: 35px -87px;
+  
 }
 
-#guides ul li a.mobile-apps {
+#guides ul li a.sky-drive {
   background-position: 35px -231px;
+  
 }
 
-#guides ul li a.apps-on-facebook {
+#guides ul li a.amazon-s3 {
   background-position: 35px -375px;
+  
 }
 
-#guides ul li a.heroku {
+#guides ul li a.dropbox {
   background-position: 35px -519px;
 }
 /* ------------------------------------------ */
@@ -339,6 +347,10 @@ header .tagline {
   text-indent: -9999px;
 }
 
+
+#files{
+  margin-right:256px;
+}
 
 /* ------------------------------------------ */
 
