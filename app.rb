@@ -106,18 +106,20 @@ get "/" do
     
     @dropbox_enabled = (session[:dropbox_session]) ? true : false
     
-    if @cur_dir == '\\'      
-      @dir = Hash["dirs" => ["google_drive", "dropbox"],
-                  "files" => ["random_text.txt"]]
-    elsif @cur_dir == "\\google_drive"
-      @dir = Hash["dirs" => ["docs", "music", "movies"],
-                  "files" => ["this_file_is_in_my_google_drive.txt"]]
+    if @cur_dir == '\\'  
+      if @dropbox_enabled    
+        @dir = Hash["dirs" => ["dropbox"],
+                    "files" => []]
+      else
+        @dir = Hash["dirs" => [],
+                    "files" => []]
+      end
     elsif @cur_dir == "\\dropbox"
       @dir = Hash["dirs" => ["code", "website", "school_stuff"],
                   "files" => ["this_file_is_in_my_dropbox.txt"]]
     else
       @dir = Hash["dirs" => [],
-                  "files" => ["this_file_is_an error_file.txt"]]
+                  "files" => [""]]
     end
     @dirs = @dir["dirs"]
     @files = @dir["files"]
