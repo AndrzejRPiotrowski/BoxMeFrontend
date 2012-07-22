@@ -285,6 +285,9 @@ header .tagline {
   line-height: 29px;
   text-align: center;
 }
+#samples h5 {
+  font-size: 10px;
+}
 
 #samples ul.pretty {
   background: url("../images/picture-sketch.png") 4px 8px;

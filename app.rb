@@ -1,5 +1,5 @@
 require "sinatra"
-require "sinatra/reloader" if development?
+require "sinatra/reloader"
 require 'dropbox_sdk'
 require 'koala'
 require 'json'
@@ -16,7 +16,6 @@ DROPBOX_ACCESS_TYPE = :dropbox    #The two valid values here are :app_folder and
                           #set to have full :dropbox access.  Check your app at
                           #https://www.dropbox.com/developers/apps
 
-
 enable :sessions
 enable :logging, :dump_errors, :raise_errors, :show_exceptions
 
@@ -27,9 +26,9 @@ enable :logging, :dump_errors, :raise_errors, :show_exceptions
 # permissions your app needs.
 # See https://developers.facebook.com/docs/reference/api/permissions/
 # for a full list of permissions
-FACEBOOK_SCOPE = 'user_likes,user_photos,user_photo_video_tags'
+FACEBOOK_SCOPE = ''
 
-unless ENV["FACEBOOK_APP_ID"] && ENV["FACEBOOK_SECRET"]
+unless ENV["FACEBOOK_APP_ID"] && ENV["FACEBOOK_SECRET"] && ENV["DROPBOX_CALLBACK_DOMAIN"]
   abort("missing env vars: please set FACEBOOK_APP_ID and FACEBOOK_SECRET with your app credentials")
 end
 
@@ -174,7 +173,7 @@ get '/auth/dropbox' do
   if not params[:oauth_token] 
     dropbox_session = DropboxSession.new(DROPBOX_APP_KEY, DROPBOX_APP_SECRET)
     session[:dropbox_session] = dropbox_session.serialize
-    redirect dropbox_session.get_authorize_url('http://localhost:5000')
+    redirect dropbox_session.get_authorize_url("http://localhost:5000")
   else
     puts"the user has returned from Dropbox"
     dropbox_session = DropboxSession.deserialize(session[:dropbox_session])

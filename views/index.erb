@@ -154,7 +154,8 @@
     <section id="samples" class="clearfix">
           
 			<div class="list" id="files">
-          <h3>Current Directory: <%= @cur_dir %></h3>
+          <h3>Your BoxMe Files:</h3>
+          <h5> Current Directory: <%= @cur_dir %> </h5>
           <% if @cur_dir != '\\'%>
             <h4><a href="/back">Back</a> </h4>
           <% end %>
@@ -229,6 +230,7 @@
 			    <p>Response: <%= @response %> </p>
 		      <p>Dropbox Token: <%= @dropbox_access.inspect %> </p>
 		      <p>Current Directory: <%= @cur_dir %></p>
+
 			    
 			  </div>
     <% end %>
