@@ -8,7 +8,7 @@ require "uri"
 require 'open-uri'
 require 'socket'
 
-ACCEPTING_CONNECTIONS = false
+ACCEPTING_CONNECTIONS = true
 DROPBOX_APP_KEY = "u4d52lnoqpoqztk"
 DROPBOX_APP_SECRET = "58xjxsb08ybg584"
 DROPBOX_ACCESS_TYPE = :dropbox    #The two valid values here are :app_folder and :dropbox
