@@ -294,6 +294,7 @@ header .tagline {
 
 #samples h3 {
   background: url("../images/header-sketch.png") no-repeat;
+  background-position: 162px 0px;
   color: #646464;
   font-weight: bold;
   font-size: 11px;
@@ -373,16 +374,24 @@ header .tagline {
 
 #files{
   position:relative;
-  padding-right:300px;
-  margin-right:300px;
-  width:350px;
+  min-width:500px;
   height:400;
+}
+
+#files a.back-button-active{
+  color:blue;
+}
+
+#files a.back-button-inactive{
+  color:gray;
+  cursor:pointer;
 }
 
 #friends{
   float:right;
-  
 }
+
+
 
 /* ------------------------------------------ */
 

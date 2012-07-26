@@ -37,54 +37,48 @@
 			</style>
 			
 			
-			<script>
-			$(function() {
-				$( "ul#files-ul li" ).draggable({
-					
-					appendTo: "body",
-					helper: "clone",
-					revert: "true"
+		<script>
+		  $(function() { 
+				browse("/");
+				$(document).delegate("ul#files-ul li", "mouseenter", function(){
+					$(this).draggable({
+						appendTo: "body", 
+						helper: "clone", 
+						revert: "true"
+					});
 				});
-				$( "li.friend-droppable" ).droppable({
-					activeClass: "ui-state-default",
-					hoverClass: "ui-state-hover",
-					accept: ":not(.ui-sortable-helper)",
+				$( "li.friend-droppable" ).droppable({ 
+					activeClass: "ui-state-default", 
+					hoverClass: "ui-state-hover", 
+					accept: ":not(.ui-sortable-helper)", 
 					drop: function( event, ui ) {
-			        var filename = ui.draggable.text().replace(/^\s+|\s+$/g, '')
-							var friend_name = $(this).text().replace(/^\s+|\s+$/g, '')
-							var friend_id = event.target.id
-							FB.ui(
-	            {
-	              method : 'apprequests',
-	              message: "I want to share \"" + filename + "\" with you, "+friend_name.split(" ")[0] + "!",
-	              to     : friend_id
-	            },
-	            function (response) {
-	              // If response is null the user canceled the dialog
-	              if (response != null) {
-									  $.post('http://localhost:5000/share',
-									         {"friend_id" :friend_id, "file_name" : filename},      
-									         function(data){},
-									         "text");
-								}
-	            logResponse(response);
-            }
-          )
-		   }});})
-			</script>
-
-
-
-
-    <script type="text/javascript">
-      function logResponse(response) {
-        if (console && console.log) {
-          console.log('The response was', response);
-        }
-      }
-
-      $(function(){
-        // Set up so we handle click on the buttons
+						var filename = ui.draggable.text().replace(/^\s+|\s+$/g,'') 
+						var friend_name = $(this).text().replace(/^\s+|\s+$/g, '') 
+						var friend_id = event.target.id 
+						FB.ui( { 
+							method: 'apprequests', 
+							message: "I want to share \"" + filename + "\" with you, "+friend_name.split(" ")[0] + "!",
+						  to: friend_id },
+					    function (response) { // If response is null the user canceled the dialog
+						  	if (response != null) { 
+									$.post(
+										'http://localhost:5000/share', 
+										{"friend_id": friend_id, "file_name" : filename},
+	      						function(data){},
+										"html"
+									);
+								} 
+								logResponse(response);
+							}
+						)
+					}
+				})
+				$(document).delegate('a.directory','click', function(e){
+					e.preventDefault()
+					browse(this.id)
+				})
+				
+				// Set up so we handle click on the buttons
         $('#postToWall').click(function() {
           FB.ui(
             {
@@ -128,8 +122,24 @@
               }
             }
           );
-        });
-      });
+        });		
+			});
+			
+			function logResponse(response) { 
+				if (console && console.log) { 
+					console.log('The response was', response);
+				}
+			} 
+			function browse(directory){
+      	$.post(
+				  'http://localhost:5000/browse',
+				  {"dir" : directory},
+				  function(data){
+			      $("#file-browser").replaceWith(data)
+			    },
+			    "html"
+			  );
+		  }
     </script>
 
     <!--[if IE]>
@@ -196,7 +206,7 @@
       <section id="guides" class="clearfix thin"></section>
     <% else %>
 		<div id="share-app">
-		  <p>Share your app:</p>
+		  <p>Share this app:</p>
 		  <ul>
 		    <li>
 		      <a href="#" class="facebook-button" id="postToWall" data-url="<%= url %>">
@@ -224,30 +234,7 @@
           
 			<div class="list" id="files">
           <h3>Your BoxMe Files:</h3>
-          <h5> Current Directory: <%= @cur_dir %> </h5>
-          <% if @cur_dir != '\\'%>
-            <h4><a href="/back">Back</a> </h4>
-          <% end %>
- 	        <% if @dir %>
-	          <ul class="friends" id="files-ul">
-		          <% if @dirs %>
-	          		<% @dirs.each do |item| %>
-			            <li>
-			              <a href="/browse/<%= item %>"><%= item %></a>
-			            </li>
-			          <% end %>
-		          <% end %>
-		          <% if @files %>
-		        		<% @files.each do |item| %>
-			            <li>
-			              <%= item %>
-			            </li>
-			          <% end %>
-		          <% end %>
-	          </ul>
-	        <% else %>
-	          <p>You don't have any files!</p>
-	        <% end %>
+          <div id="file-browser"></div>
       </div>
 
 
@@ -301,7 +288,7 @@
 		    <div>
 			    <h2>Debug Info</h2>
 			    <p>Response: <%= @response %> </p>
-		      <p>Dropbox Token: <%= @dropbox_access %> </p>
+		      <p>Dropbox Token: <%= @dropbox_enabled %> </p>
 		      <p>Current Directory: <%= @cur_dir %></p>
 
 			    

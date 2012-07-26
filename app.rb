@@ -8,7 +8,7 @@ require "uri"
 require 'open-uri'
 require 'socket'
 
-ACCEPTING_CONNECTIONS = true
+$ACCEPTING_CONNECTIONS = false
 DROPBOX_APP_KEY = "u4d52lnoqpoqztk"
 DROPBOX_APP_SECRET = "58xjxsb08ybg584"
 DROPBOX_ACCESS_TYPE = :dropbox    #The two valid values here are :app_folder and :dropbox
@@ -74,23 +74,18 @@ get "/" do
   @graph  = Koala::Facebook::API.new(session[:access_token])
   # Get public details of current application
   @app  =  @graph.get_object(ENV["FACEBOOK_APP_ID"])
-  
   if session[:access_token]
+    @dropbox_enabled = (session[:dropbox_session]) ? true : false
     @user    = @graph.get_object("me")
-    @friends = @graph.get_connections('me', 'friends')
-    @friends = @graph.fql_query("SELECT uid, name, is_app_user, pic_square FROM user WHERE uid=1342512190 or uid=611336274 or uid=688985918")
+    #@friends = @graph.get_connections('me', 'friends')
+    @friends = @graph.fql_query("SELECT uid, name, is_app_user, pic_square FROM user WHERE uid=1342512190 or uid=611336274 or uid=688985918 or uid=1048504295")
     #@photos  = @graph.get_connections('me', 'photos')
-    @likes   = @graph.get_connections('me', 'likes').first(4)
+    #@likes   = @graph.get_connections('me', 'likes').first(4)
     # for other data you can always run fql
     @friends_using_app = @graph.fql_query("SELECT uid, name, is_app_user, pic_square FROM user WHERE uid in (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1")
     # get root directory listing from back-backend
     session[:fbid]=@user["id"]
-    
-    if not session[:cur_dir]
-      session[:cur_dir] = '\\'
-    end   
-    @cur_dir = session[:cur_dir]
-    if ACCEPTING_CONNECTIONS
+    if $ACCEPTING_CONNECTIONS
       port = 9125
       host = "23.21.149.90"
       socket = TCPSocket.new(host,port)
@@ -103,26 +98,6 @@ get "/" do
       socket.close
       @responsedir = JSON.parse(all_data.join)
     end
-    
-    @dropbox_enabled = (session[:dropbox_session]) ? true : false
-    
-    if @cur_dir == '\\'  
-      if @dropbox_enabled    
-        @dir = Hash["dirs" => ["dropbox"],
-                    "files" => []]
-      else
-        @dir = Hash["dirs" => [],
-                    "files" => []]
-      end
-    elsif @cur_dir == "\\dropbox"
-      @dir = Hash["dirs" => ["code", "website", "school_stuff"],
-                  "files" => ["this_file_is_in_my_dropbox.txt"]]
-    else
-      @dir = Hash["dirs" => [],
-                  "files" => [""]]
-    end
-    @dirs = @dir["dirs"]
-    @files = @dir["files"]
   end
   erb :index
 end
@@ -167,7 +142,7 @@ get '/auth/dropbox' do
     @dropbox_secret = @dropbox_access.secret
     client = DropboxClient.new(dropbox_session, DROPBOX_ACCESS_TYPE) #raise an exception if session not authorized
     session[:dbuid] = client.account_info["uid"] # look up account information
-    if ACCEPTING_CONNECTIONS
+    if $ACCEPTING_CONNECTIONS
       port = 9125
       host = "23.21.149.90"
       socket = TCPSocket.new(host,port)
@@ -185,20 +160,97 @@ get '/auth/dropbox' do
   end
 end
 
-get '/browse/:directory' do 
-  if :directory
-    if session[:cur_dir] == "\\"
-      session[:cur_dir] = session[:cur_dir]+params[:directory]
+post '/browse' do 
+  dir = params[:dir]
+  if not session[:cur_dir]
+    session[:cur_dir] = "/"
+  end   
+  @dropbox_enabled = (session[:dropbox_session]) ? true : false
+  session[:cur_dir] = dir
+  puts "Current Directory: #{dir}"
+  if session[:cur_dir] == "/"
+    if @dropbox_enabled    
+      @dir = Hash[:dirs => ["dropbox"],
+                  :files => []]
     else
-     session[:cur_dir] = session[:cur_dir]+"\\"+params[:directory]
-    end 
+      @dir = Hash[:dirs => [],
+                  :files => []]
+    end
+  else
+    if session[:cur_dir] == "/dropbox"
+      @dir = Hash[:dirs => ["code", "website", "school_stuff"],
+                  :files => ["this_file_is_in_my_dropbox.txt"]]
+    elsif session[:cur_dir] == "/dropbox/code"
+      @dir = Hash[:dirs => ["ruby", "python", "java"],
+                  :files => ["this_file_is_in_my_dropbox.txt"]]
+    elsif session[:cur_dir] == "/dropbox/code/ruby"
+      @dir = Hash[:dirs => ["sinatra"],
+                  :files => ["test.rb"]] 
+    elsif session[:cur_dir] == "/dropbox/code/ruby/sinatra"
+      @dir = Hash[:dirs => ["boxme"],
+                  :files => [""]]
+    elsif session[:cur_dir] == "/dropbox/code/ruby/sinatra/boxme"
+      @dir = Hash[:dirs => ["public", "views"],
+                  :files => ["app.rb","config.ru","Gemfile","Procfile","Readme"]]
+    elsif session[:cur_dir] == "/dropbox/code/ruby/sinatra/boxme/views"
+      @dir = Hash[:dirs => [],
+                  :files => ["index.erb"]]
+    elsif session[:cur_dir] == "/dropbox/code/ruby/sinatra/boxme/public"
+      @dir = Hash[:dirs => ["images","javascripts","stylesheets"],
+                  :files => ["channel.html"]]
+    elsif session[:cur_dir] == "/dropbox/code/ruby/sinatra/boxme/public/images"
+      @dir = Hash[:dirs => [],
+                  :files => ["amazon-s3.png","dropbox-icon.png","google-drive-icon.png","skydrive-icon.png"]]  
+    elsif session[:cur_dir] == "/dropbox/code/ruby/sinatra/boxme/public/javascripts"
+      @dir = Hash[:dirs => [],
+                  :files => ["jquery-1.7.1.min.js","jquery-ui-1.8.21.custom.min.js"]]
+    elsif session[:cur_dir] == "/dropbox/code/ruby/sinatra/boxme/public/stylesheets"
+      @dir = Hash[:dirs => [],
+                  :files => ["base.css","mobile.css","reset.css","screen.css"]]    
+    
+    else
+      @dir = Hash[:dirs => [],
+                  :files => []]
+    end
   end
-  redirect '/'
+  
+  @output = "<div id='file-browser'><h4>"
+  if session[:cur_dir] != '/'
+    parent = session[:cur_dir].split("/")[0...-1].join("/")
+    parent = (parent == "" ? "/" : parent)
+    @output += "<a href='#' class='directory' id='#{parent}'>Back</a>"
+  else
+    @output += "Back"
+  end
+  @output += "</h4><h5>Current Directory: #{session[:cur_dir]} </h5>"
+  if @dropbox_enabled 
+    @output += "<ul class='friends' id='files-ul'>"
+    unless @dir[:dirs].empty?
+      @dir[:dirs].each do |dir|
+        @output += "<li><a class='directory' id='#{session[:cur_dir]}"
+        @output += "/" if session[:cur_dir] != '/'
+        @output += dir + "' href='#'>#{dir}</a></li>"
+      end
+    end
+    unless @dir[:files].empty?
+      @dir[:files].each do |file|
+        @output += "<li id='#{session[:cur_dir]}"
+        @output += "/" if session[:cur_dir] != '/'
+        @output += session[:cur_dir]+file+"'>#{file}</li>"
+      end
+    end
+    @output += "</ul>"
+  else
+    @output += "<p>You don't have any files!</p>"
+  end
+  @output += "</div>"
+  # parse Backend.getFilesUnderPath(session[:user_id], session[:cur_dir]).to_json into html and return
+  return @output 
 end
   
 get '/back' do
-  parent = session[:cur_dir].split("\\")[0...-1].join("\\")
-  parent = (parent == "" ? "\\" : parent)
+  parent = session[:cur_dir].split("/")[0...-1].join("/")
+  parent = (parent == "" ? "/" : parent)
   session[:cur_dir] = parent
   redirect '/'
 end
@@ -207,7 +259,7 @@ post '/share' do
   friend_id = params["friend_id"]
   filename = params["file_name"]
   fbid = session[:fbid]
-  if ACCEPTING_CONNECTIONS
+  if $ACCEPTING_CONNECTIONS
     port = 9125
     host = "23.21.149.90"
     socket = TCPSocket.new(host,port)
