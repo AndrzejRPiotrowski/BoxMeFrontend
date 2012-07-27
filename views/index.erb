@@ -63,7 +63,7 @@
 					    function (response) { // If response is null the user canceled the dialog
 						  	if (response != null) { 
 									$.post(
-										domain + '/share', 
+										DOMAIN + '/share', 
 										{"friend_id": friend_id, "file_name" : filename},
 	      						function(data){},
 										"html"
@@ -133,7 +133,7 @@
 			} 
 			function browse(directory){
       	$.post(
-				  domain + '/browse',
+				  DOMAIN + '/browse',
 				  {"dir" : directory},
 				  function(data){
 			      $("#file-browser").replaceWith(data)
