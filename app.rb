@@ -214,16 +214,16 @@ post '/browse' do
     end
   end
   
-  @output = "<div id='file-browser'><h4>"
-  if session[:cur_dir] != '/'
-    parent = session[:cur_dir].split("/")[0...-1].join("/")
-    parent = (parent == "" ? "/" : parent)
-    @output += "<a href='#' class='directory' id='#{parent}'>Back</a>"
-  else
-    @output += "Back"
-  end
-  @output += "</h4><h5>Current Directory: #{session[:cur_dir]} </h5>"
+  @output = "<div id='file-browser'>"
   if @dropbox_enabled 
+    if session[:cur_dir] != '/'
+      parent = session[:cur_dir].split("/")[0...-1].join("/")
+      parent = (parent == "" ? "/" : parent)
+      @output += "<h4><a href='#' class='directory' id='#{parent}'>Back</a>"
+    else
+      @output += "<h4>Back"
+    end
+    @output += "</h4><h5>Current Directory: #{session[:cur_dir]} </h5>"
     @output += "<ul class='friends' id='files-ul'>"
     unless @dir[:dirs].empty?
       @dir[:dirs].each do |dir|

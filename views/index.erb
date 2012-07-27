@@ -38,6 +38,7 @@
 			
 			
 		<script>
+		  var DOMAIN = 'https://apps.facebook.com/349009881841220/' // 'http://localhost:5000
 		  $(function() { 
 				browse("/");
 				$(document).delegate("ul#files-ul li", "mouseenter", function(){
@@ -62,7 +63,7 @@
 					    function (response) { // If response is null the user canceled the dialog
 						  	if (response != null) { 
 									$.post(
-										'http://localhost:5000/share', 
+										domain + '/share', 
 										{"friend_id": friend_id, "file_name" : filename},
 	      						function(data){},
 										"html"
@@ -132,7 +133,7 @@
 			} 
 			function browse(directory){
       	$.post(
-				  'http://localhost:5000/browse',
+				  domain + '/browse',
 				  {"dir" : directory},
 				  function(data){
 			      $("#file-browser").replaceWith(data)
